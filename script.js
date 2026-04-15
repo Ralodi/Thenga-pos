@@ -42,7 +42,7 @@ function showRegistrationModal() {
     const newForm = form.cloneNode(true);
     form.parentNode.replaceChild(newForm, form);
 
-    newForm.addEventListener('submit', (e) => {
+   newForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const pin = document.getElementById('regPin').value;
         const confirmPin = document.getElementById('regPinConfirm').value;
@@ -58,25 +58,27 @@ function showRegistrationModal() {
             createdAt: new Date().toISOString()
         };
         saveBusiness();
-        
+
+        // Register in Supabase
+        if (isOnline()) {
+            try {
+                const sbBusiness = await sbRegisterBusiness({
+                    business_name: business.businessName,
+                    business_type: business.businessType,
+                    owner_name: business.ownerName,
+                    contact: business.contact,
+                    pin_hash: business.pin
+                });
+                business.sbId = sbBusiness.id;
+                saveBusiness();
+            } catch(e) { console.warn('Supabase registration failed:', e); }
+        }
+
         document.getElementById('registrationModal').style.display = 'none';
         setupMainApp();
     });
 }
-// After saveBusiness(), register in Supabase too
-if (isOnline()) {
-    try {
-        const sbBusiness = await sbRegisterBusiness({
-            business_name: business.businessName,
-            business_type: business.businessType,
-            owner_name: business.ownerName,
-            contact: business.contact,
-            pin_hash: business.pin // ideally hash this, but fine for MVP
-        });
-        business.sbId = sbBusiness.id;
-        saveBusiness();
-    } catch(e) { console.warn('Supabase registration failed:', e); }
-}
+
 // ==================== LOGIN ====================
 function showLoginScreen() {
     document.getElementById('loginModal').style.display = 'flex';

@@ -1,5 +1,5 @@
 // ==================== SUPABASE CONFIG ====================
-const SUPABASE_URL = 'fiarguztbpkevntmtbzo'; // from Supabase > Settings > API
+const SUPABASE_URL = 'https://fiarguztbpkevntmtbzo.supabase.co'; // from Supabase > Settings > API
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZpYXJndXp0YnBrZXZudG10YnpvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI1NTIyODgsImV4cCI6MjA4ODEyODI4OH0.MmeJdbqVUcgfYdy3PJPOqI1h6zs4Tf2VXT6-piL96JU'; // from Supabase > Settings > API
 
 const { createClient } = supabase;
