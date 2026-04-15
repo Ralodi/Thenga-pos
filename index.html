@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>THENGA POS – Business Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="theme-color" content="#0A192F">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/minified/html5-qrcode.min.js"></script>
+</head>
+<body>
+<div id="app">
+
+    <!-- ===== REGISTRATION MODAL ===== -->
+    <div id="registrationModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <h2><i class="fas fa-store"></i> Register Your Business</h2>
+            <p class="modal-subtitle">Set up your Thenga POS account</p>
+            <form id="registrationForm">
+                <input type="text" id="businessName" placeholder="Business Name" required>
+                <select id="businessType" required>
+                    <option value="">Select Business Type</option>
+                    <option value="tavern">Tavern / Shebeen</option>
+                    <option value="tuckshop">Tuckshop / Spaza</option>
+                </select>
+                <input type="text" id="ownerName" placeholder="Owner Name" required>
+                <input type="tel" id="contact" placeholder="Phone Number" required>
+                <hr class="form-divider">
+                <p class="form-hint"><i class="fas fa-lock"></i> Create a PIN to secure your account</p>
+                <input type="password" id="regPin" placeholder="Create PIN (min 4 digits)" inputmode="numeric" minlength="4" required>
+                <input type="password" id="regPinConfirm" placeholder="Confirm PIN" inputmode="numeric" minlength="4" required>
+                <p id="regError" class="auth-error" style="display:none;"></p>
+                <button type="submit" class="btn-primary">Start Using THENGA POS</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===== LOGIN MODAL ===== -->
+    <div id="loginModal" class="modal" style="display:none;">
+        <div class="modal-content login-modal-content">
+            <div class="login-logo"><i class="fas fa-chart-line"></i><span>THENGA POS</span></div>
+            <h2 id="loginBusinessName" class="login-business-name"></h2>
+            <p id="loginOwnerName" class="login-owner-name"></p>
+            <form id="loginForm">
+                <div class="pin-input-wrapper">
+                    <i class="fas fa-lock pin-icon"></i>
+                    <input type="password" id="loginPin" placeholder="Enter your PIN" inputmode="numeric" minlength="4" required autocomplete="current-password">
+                </div>
+                <p id="loginError" class="auth-error" style="display:none;"></p>
+                <button type="submit" class="btn-primary"><i class="fas fa-sign-in-alt"></i> Login</button>
+            </form>
+            <button id="switchAccountBtn" class="btn-link"><i class="fas fa-exchange-alt"></i> Not your business? Switch account</button>
+        </div>
+    </div>
+
+    <!-- ===== MAIN APP ===== -->
+    <div id="mainApp" style="display:none;">
+
+        <header class="app-header">
+            <div class="logo"><i class="fas fa-chart-line"></i><span>THENGA POS</span></div>
+            <div class="business-info">
+                <span id="businessNameDisplay"></span>
+                <span id="businessTypeDisplay" class="badge"></span>
+            </div>
+            <button id="logoutBtn" class="icon-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></button>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</button>
+            <button class="tab-btn" data-tab="pos"><i class="fas fa-cash-register"></i> Point of Sale</button>
+            <button class="tab-btn" data-tab="inventory"><i class="fas fa-boxes"></i> Inventory</button>
+            <button class="tab-btn" data-tab="reports"><i class="fas fa-chart-line"></i> Reports</button>
+            <button class="tab-btn" data-tab="credit"><i class="fas fa-users"></i> Credit Customers</button>
+            <button class="tab-btn" data-tab="settings"><i class="fas fa-cog"></i> Settings</button>
+        </div>
+
+        <!-- DASHBOARD -->
+        <div id="dashboardTab" class="tab-content active">
+            <div class="stats-grid">
+                <div class="stat-card"><i class="fas fa-chart-line"></i><h3>Total Sales</h3><p id="totalSales">R0.00</p></div>
+                <div class="stat-card"><i class="fas fa-coins"></i><h3>Total Profit</h3><p id="totalProfit">R0.00</p></div>
+                <div class="stat-card"><i class="fas fa-tag"></i><h3>Items Sold</h3><p id="itemsSold">0</p></div>
+            </div>
+            <div class="dashboard-sections">
+                <div class="card"><h3>🏆 Top Selling Products</h3><ul id="topProductsList"></ul></div>
+                <div class="card"><h3>⚠️ Low Stock Alerts</h3><ul id="lowStockList"></ul></div>
+            </div>
+        </div>
+
+        <!-- POS TAB -->
+        <div id="posTab" class="tab-content">
+            <div class="barcode-scanner-section">
+                <div class="scanner-header">
+                    <i class="fas fa-qrcode"></i><h3>Scan Barcode</h3>
+                </div>
+                <div class="scanner-controls">
+                    <button id="startScannerBtn" class="btn-primary"><i class="fas fa-camera"></i> Scan Barcode</button>
+                    <button id="stopScannerBtn" class="btn-outline" style="display:none;"><i class="fas fa-stop"></i> Stop Camera</button>
+                    <div class="manual-barcode">
+                        <input type="text" id="manualBarcode" placeholder="Or type barcode number">
+                        <button id="manualBarcodeBtn" class="btn-primary">Add</button>
+                    </div>
+                </div>
+                <div id="scannerPreview" style="width:100%;max-width:500px;margin:1rem auto;display:none;"></div>
+                <div id="scannedResult" class="scanned-result"></div>
+            </div>
+            <div class="pos-layout">
+                <div class="products-section">
+                    <h2><i class="fas fa-boxes"></i> Products</h2>
+                    <div class="category-tabs" id="posCategories"></div>
+                    <div class="products-grid" id="productsGrid"></div>
+                </div>
+                <div class="cart-section">
+                    <div class="cart-header">
+                        <h2><i class="fas fa-shopping-cart"></i> Current Sale</h2>
+                        <button class="clear-cart-btn" onclick="clearCart()">Clear</button>
+                    </div>
+                    <div id="cartItems" class="cart-items"></div>
+                    <div class="cart-summary">
+                        <div>Subtotal: <span id="subtotal">R0.00</span></div>
+                        <div>VAT (15%): <span id="vat">R0.00</span></div>
+                        <div class="total">Total: <span id="total">R0.00</span></div>
+                    </div>
+                    <div class="payment-section">
+                        <input type="number" id="cashAmount" placeholder="Cash Received">
+                        <button class="checkout-btn" onclick="processPayment()">Complete Sale</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- INVENTORY TAB -->
+        <div id="inventoryTab" class="tab-content">
+            <!-- Inventory Barcode Scanner -->
+            <div class="barcode-scanner-section">
+                <div class="scanner-header">
+                    <i class="fas fa-barcode"></i><h3>Scan to Find or Add Product</h3>
+                </div>
+                <div class="scanner-controls">
+                    <button id="invScanBtn" class="btn-primary"><i class="fas fa-camera"></i> Scan Barcode</button>
+                    <button id="invStopScanBtn" class="btn-outline" style="display:none;"><i class="fas fa-stop"></i> Stop Camera</button>
+                </div>
+                <div id="invScannerPreview" style="width:100%;max-width:500px;margin:1rem auto;display:none;"></div>
+                <div id="invScanResult" class="scanned-result"></div>
+            </div>
+
+<div class="inventory-header">
+    <h2><i class="fas fa-boxes"></i> Manage Products</h2>
+    <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+        <button id="addProductBtn" class="btn-primary">
+            <i class="fas fa-plus"></i> Add Product
+        </button>
+        <button class="btn-order-stock" onclick="orderStock()">
+            <i class="fas fa-shopping-cart"></i> Order Stock
+        </button>
+    </div>
+</div>
+            <div class="inventory-filters">
+                <input type="text" id="searchProduct" placeholder="Search product...">
+                <select id="filterCategory"></select>
+            </div>
+            <div id="lowStockBanner" class="low-stock-banner" style="display:none;">
+    <span><i class="fas fa-exclamation-triangle"></i> <span id="lowStockCount"></span> products running low — restock now</span>
+    <button class="btn-order-stock-sm" onclick="orderStock()">Order now</button>
+</div>
+            <div id="inventoryList" class="inventory-list"></div>
+        </div>
+
+        <!-- REPORTS TAB -->
+        <div id="reportsTab" class="tab-content">
+            <div class="reports-container">
+                <h2><i class="fas fa-chart-line"></i> Sales Reports</h2>
+                <div class="report-filters">
+                    <select id="reportPeriod">
+                        <option value="day">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                        <option value="year">This Year</option>
+                    </select>
+                    <button id="generateReportBtn" class="btn-primary">Generate Report</button>
+                    <button id="exportReportBtn" class="btn-outline">Export to CSV</button>
+                </div>
+                <div id="reportSummary" class="report-summary">
+                    <div class="report-card"><i class="fas fa-chart-line"></i><h3>Total Sales</h3><p id="reportTotalSales">R0.00</p></div>
+                    <div class="report-card"><i class="fas fa-coins"></i><h3>Total Profit</h3><p id="reportTotalProfit">R0.00</p></div>
+                    <div class="report-card"><i class="fas fa-box"></i><h3>Items Sold</h3><p id="reportItemsSold">0</p></div>
+                    <div class="report-card"><i class="fas fa-exchange-alt"></i><h3>Transactions</h3><p id="reportTransactions">0</p></div>
+                </div>
+                <h3>Top Selling Products</h3><div id="reportTopProducts"></div>
+                <h3>Sales by Day</h3><div id="reportDailySales"></div>
+            </div>
+        </div>
+
+        <!-- CREDIT TAB -->
+        <div id="creditTab" class="tab-content">
+            <div class="credit-container">
+                <h2><i class="fas fa-hand-holding-usd"></i> Credit Customers</h2>
+                <div class="credit-actions">
+                    <button id="addCustomerBtn" class="btn-primary"><i class="fas fa-plus"></i> Add Customer</button>
+                </div>
+                <div class="credit-stats">
+                    <div class="stat-card"><i class="fas fa-users"></i><h3>Total Customers</h3><p id="totalCustomers">0</p></div>
+                    <div class="stat-card"><i class="fas fa-money-bill-wave"></i><h3>Total Owed</h3><p id="totalOwed">R0.00</p></div>
+                </div>
+                <div id="customerList" class="customer-list"></div>
+            </div>
+        </div>
+
+        <!-- SETTINGS TAB -->
+        <div id="settingsTab" class="tab-content">
+            <div class="settings-card">
+                <h3>Business Information</h3>
+                <form id="settingsForm">
+                    <label>Business Name</label><input type="text" id="settingsBusinessName">
+                    <label>Business Type</label>
+                    <select id="settingsBusinessType">
+                        <option value="tavern">Tavern / Shebeen</option>
+                        <option value="tuckshop">Tuckshop / Spaza</option>
+                    </select>
+                    <label>Owner Name</label><input type="text" id="settingsOwnerName">
+                    <label>Phone Number</label><input type="tel" id="settingsContact">
+                    <button type="submit" class="btn-primary">Save Changes</button>
+                </form>
+                <hr class="form-divider">
+                <button id="changePinBtn" class="btn-outline"><i class="fas fa-key"></i> Change PIN</button>
+                <hr class="form-divider">
+                <button id="resetDataBtn" class="btn-danger"><i class="fas fa-trash"></i> Reset All Data</button>
+            </div>
+        </div>
+
+    </div><!-- end mainApp -->
+</div><!-- end app -->
+
+<script src="script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

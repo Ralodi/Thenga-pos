@@ -1,0 +1,21 @@
+{
+    "name": "THENGA POS",
+    "short_name": "THENGA POS",
+    "description": "Point of Sale for Township Businesses",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#0A192F",
+    "theme_color": "#FFD966",
+    "icons": [
+        {
+            "src": "https://via.placeholder.com/192x192?text=THENGA",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "https://via.placeholder.com/512x512?text=THENGA",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ]
+}
